@@ -1,0 +1,11 @@
+type Question {
+    _id: ID
+    label: String!
+    options: [String]!
+    author: ID
+}
+
+
+type Query {
+    questions:[Question]
+}
