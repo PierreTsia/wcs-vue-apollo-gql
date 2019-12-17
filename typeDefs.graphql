@@ -1,11 +1,39 @@
 type Question {
-    _id: ID
-    label: String!
-    options: [String]!
-    author: ID
+  _id: ID!
+  label: String!
+  options: [String]!
+  answer: [String]!
 }
 
+type Quizz {
+  _id: ID
+  author: String!
+  title: String!
+  questions: [Question]!
+}
+
+input QuestionInput {
+  _id: ID
+  label: String!
+  options: [String]!
+  answer: [String]!
+}
+
+input QuizzInput {
+  _id: ID
+  title: String!
+  author: String!
+  questions: [QuestionInput]!
+}
 
 type Query {
-    questions:[Question]
+  questions: [Question]
+  quizzById(quizzId: ID!): Quizz
+  allQuizz: [Quizz]
+}
+type Mutation {
+  addQuestion(label: String!, options: [String]!, answer: [String]!): Question
+  saveQuizz(quizzInput: QuizzInput!): Quizz
+  deleteQuizz(quizzId: ID!): Boolean
+  updateQuestion(questionInput: QuestionInput!): Question
 }
