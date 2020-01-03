@@ -5,13 +5,16 @@
   "main": "index.js",
   "scripts": {
     "server": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "client": "cd client && yarn serve",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently -r --names \"server, client\" \"yarn server --silent\" \"yarn client --silent\" "
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "apollo-server": "^2.9.13",
+    "concurrently": "^5.0.2",
     "dotenv": "^8.2.0",
     "graphql": "^14.5.8",
     "mongoose": "^5.8.3",
