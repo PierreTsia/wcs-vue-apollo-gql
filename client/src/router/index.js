@@ -13,7 +13,8 @@ const routes = [
   {
     path: "/edit-quizz/:id",
     name: "edit-quizz",
-    component: () => import(/* webpackChunkName: "about" */ "../views/EditQuizz.vue")
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/EditQuizz.vue")
   },
   {
     path: "/take-quizz/:id",
