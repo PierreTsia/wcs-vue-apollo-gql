@@ -16,3 +16,9 @@ export const ALL_QUIZZ = gql`
     }
   }
 `;
+
+export const DELETE_QUIZZ_BY_ID = gql`
+  mutation($quizzId: ID!) {
+    deleteQuizz(quizzId: $quizzId)
+  }
+`;

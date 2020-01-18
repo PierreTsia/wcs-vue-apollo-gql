@@ -99,3 +99,16 @@ Dans cette étape on va :
 - écrire nos premières query ALL_QUESTIONS && ALL_QUIZZ
 - s'assurer qu'elles fonctionnenent en les testant dans un composant Vue
 
+### [Step 6](./doc/step6.md)
+
+Dans cette étape on va :
+
+- créer notre système de route
+- boostraper nos 3 "views" : Home, EditQuizz et TakeQuizz
+
+### [Step 7](./doc/step7.md)
+
+Dans cette étape on va :
+
+- installer une framework CSS
+- créer notre composant Home et la logique qui va avec
