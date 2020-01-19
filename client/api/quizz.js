@@ -22,3 +22,19 @@ export const DELETE_QUIZZ_BY_ID = gql`
     deleteQuizz(quizzId: $quizzId)
   }
 `;
+
+export const QUIZZ_BY_ID = gql`
+  query($quizzId: ID!) {
+    quizzById(quizzId: $quizzId) {
+      _id
+      author
+      title
+      questions {
+        _id
+        label
+        options
+        answer
+      }
+    }
+  }
+`;
