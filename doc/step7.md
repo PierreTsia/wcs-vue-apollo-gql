@@ -604,9 +604,35 @@ Dans `Home` :
   :isActive="quizz._id === activeQuizzId"
   @onSelectQuizz="handleQuizzSelected"
   @onDeleteQuizz="handleDeleteQuizz"
-  @oneditQuizz="editQuizz"
+  @onEditQuizz="editQuizz"
 />
 ```
+
+Pour la redirection vers `TakeQuizz`, c'est _exactement_ la même chose :
+
+`QuizzItem` :
+
+```html
+<v-btn icon color="blue darken-2" @click="$emit('onTakeQuizz', quizz._id)">
+  <v-icon large>mdi-play</v-icon>
+</v-btn>
+```
+
+`Home` :
+
+```html
+<QuizzItem
+  v-for="quizz in allQuizz"
+  :key="quizz._id"
+  :quizz="quizz"
+  :isActive="quizz._id === activeQuizzId"
+  @onSelectQuizz="handleQuizzSelected"
+  @onDeleteQuizz="handleDeleteQuizz"
+  @onEditQuizz="editQuizz"
+  @onTakeQuizz="takeQuizz"
+/>
+```
+
 Voilà, toutes nos fonctionnalités marchent de nouveau !
 
 On en a fini pour la page `Home` 🕺!

@@ -17,7 +17,11 @@
           <div v-if="quizz.questions.length > 3">...</div>
         </v-flex>
         <div>
-          <v-btn icon color="blue darken-2">
+          <v-btn
+            icon
+            color="blue darken-2"
+            @click="$emit('onTakeQuizz', quizz._id)"
+          >
             <v-icon large>mdi-play</v-icon>
           </v-btn>
         </div>

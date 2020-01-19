@@ -11,7 +11,8 @@
         :isActive="quizz._id === activeQuizzId"
         @onSelectQuizz="handleQuizzSelected"
         @onDeleteQuizz="handleDeleteQuizz"
-        @oneditQuizz="editQuizz"
+        @onEditQuizz="editQuizz"
+        @onTakeQuizz="takeQuizz"
       />
     </v-flex>
     <v-flex xs12>
