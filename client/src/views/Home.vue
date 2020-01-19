@@ -31,7 +31,7 @@
               <div v-if="quizz.questions.length > 3">...</div>
             </v-flex>
             <div>
-              <v-btn icon color="blue darken-2">
+              <v-btn icon color="blue darken-2" @click="takeQuizz(quizz._id)">
                 <v-icon large>mdi-play</v-icon>
               </v-btn>
             </div>
@@ -39,7 +39,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn icon color="green accent-4">
+          <v-btn icon color="green accent-4" @click="editQUizz(quizz._id)">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
           <v-btn
@@ -52,12 +52,16 @@
         </v-card-actions>
       </v-card>
     </v-flex>
+    <v-flex xs12>
+      <v-btn @click="editQUizz('new')" text color="red accent-4">
+        <v-icon>mdi-plus</v-icon>
+        Create a new quizz
+      </v-btn>
+    </v-flex>
   </v-layout>
 </template>
 
 <script>
-// @ is an alias to /src
-
 import { ALL_QUIZZ } from "../../api/quizz";
 import { DELETE_QUIZZ_BY_ID } from "../../api/quizz";
 
@@ -78,7 +82,6 @@ export default {
       return data.allQuizz;
     },
     async handleDeleteQuizz(quizzId) {
-      console.log({ quizzId });
       const { data } = await this.$apollo.mutate({
         mutation: DELETE_QUIZZ_BY_ID,
         variables: { quizzId }
@@ -87,8 +90,11 @@ export default {
         this.allQuizz = this.allQuizz.filter(quizz => quizz._id !== quizzId);
       }
     },
-    isActiveQuizz(quizzId) {
-      return this.activeQuizzId === quizzId;
+    editQUizz(quizzId) {
+      this.$router.push(`/edit-quizz/${quizzId}`);
+    },
+    takeQuizz(quizzId) {
+      this.$router.push(`/take-quizz/${quizzId}`);
     }
   },
   async mounted() {
