@@ -13,7 +13,9 @@ C'est entièrement optionnel et au choix de chacun : il y en a des tas, tous les
 
 Pour l'installer, il suffit de :
 
-    vue add vuetify
+```shell script
+  vue add vuetify
+```
 
 puis de choisir l'option par défaut.
 
@@ -23,21 +25,23 @@ Note : en installant le plugin Vuetify, Vue Cli edit le contenu du fichier `App.
 
 Pour revenir à l'état précédent, on va dégager tout le code boilerplate dans App.vue pour ne laisser que ça :
 
-    <template>
-      <v-app>
-        <v-content>
-          <router-view></router-view>
-        </v-content>
-      </v-app>
-    </template>
+```html
+<template>
+  <v-app>
+    <v-content>
+      <router-view></router-view>
+    </v-content>
+  </v-app>
+</template>
 
-    <script>
-    export default {
-      name: "App",
-      components: {},
-      data: () => ({})
-    };
-    </script>
+<script>
+  export default {
+    name: "App",
+    components: {},
+    data: () => ({})
+  };
+</script>
+```
 
 `<v-app>` et `<v-content>` ou tous les éléments html qui commencent par `<v-quelquechose>` sont propres à Vuetify. Si vous avez choisi un autre framework, ne vous en souciez pas.
 
@@ -52,60 +56,60 @@ On rentre dans le vif du sujet. Dans un premier temps on doit :
 
 ### 1. Afficher les quizz
 
-    <template>
-      <v-layout class="home" column>
-        <v-flex xs12>
-          <h1 class="text-center">Vue Quizz App</h1>
-        </v-flex>
-        <v-flex xs12 class="mt-10 pa-5">
-          <v-card class="mx-auto mb-2" v-for="quizz in allQuizz" :key="quizz._id">
-            <v-card-text>
-              <div>{{ quizz.author }}</div>
-              <p class="display-1 text--primary">
-                {{ quizz.title }}
-              </p>
-              <p>{{ quizz.questions.length }} questions</p>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn icon color="deep-purple accent-4">
-                <v-icon>mdi-pencil</v-icon>
-              </v-btn>
-              <v-btn icon color="deep-purple accent-4">
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-flex>
-      </v-layout>
-    </template>
+```html
+<template>
+  <v-layout class="home" column>
+    <v-flex xs12>
+      <h1 class="text-center">Vue Quizz App</h1>
+    </v-flex>
+    <v-flex xs12 class="mt-10 pa-5">
+      <v-card class="mx-auto mb-2" v-for="quizz in allQuizz" :key="quizz._id">
+        <v-card-text>
+          <div>{{ quizz.author }}</div>
+          <p class="display-1 text--primary">
+            {{ quizz.title }}
+          </p>
+          <p>{{ quizz.questions.length }} questions</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn icon color="deep-purple accent-4">
+            <v-icon>mdi-pencil</v-icon>
+          </v-btn>
+          <v-btn icon color="deep-purple accent-4">
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-flex>
+  </v-layout>
+</template>
 
-    <script>
-    // @ is an alias to /src
+<script>
+  import { ALL_QUIZZ } from "../../api/quizz";
 
-    import { ALL_QUIZZ } from "../../api/quizz";
-
-    export default {
-      name: "home",
-      components: {},
-      data() {
-        return {
-          allQuizz: []
-        };
-      },
-      methods: {
-        async fetchAllQuizz() {
-          const { data } = await this.$apollo.query({
-            query: ALL_QUIZZ
-          });
-          return data.allQuizz;
-        }
-      },
-      async mounted() {
-        this.allQuizz = await this.fetchAllQuizz();
+  export default {
+    name: "home",
+    components: {},
+    data() {
+      return {
+        allQuizz: []
+      };
+    },
+    methods: {
+      async fetchAllQuizz() {
+        const { data } = await this.$apollo.query({
+          query: ALL_QUIZZ
+        });
+        return data.allQuizz;
       }
-    };
-    </script>
+    },
+    async mounted() {
+      this.allQuizz = await this.fetchAllQuizz();
+    }
+  };
+</script>
+```
 
 (une fois encore, ne faites pas attention aux détails des classes et éléments Vuetify)
 
@@ -121,12 +125,11 @@ Les choses intéréssantes sont plutôt :
 
 Sur le bouton delete _:_
 
-    <v-btn
-        @click="handleDeleteQuizz(quizz._id)"
-        icon
-        color="deep-purple accent-4">
-      <v-icon>mdi-delete</v-icon>
-    </v-btn>
+```html
+<v-btn @click="handleDeleteQuizz(quizz._id)" icon color="deep-purple accent-4">
+  <v-icon>mdi-delete</v-icon>
+</v-btn>
+```
 
 - On attache un listener à un élément du DOM avec @ `@nomDeLevent` (ici click)
 - Il faut ajouter ici un modificateur `.native` parce que `v-icon` (qui vient de Vuetify) est lui même un composant Vue et non un élément standard HTML (si on avait un span ou un div ou tout autre élément "normal", @click suffit)
@@ -134,6 +137,7 @@ Sur le bouton delete _:_
 
 Dans la partie JS du composant, on ajoute notre handler :
 
+```javascript
     methods: {
         async handleDeleteQuizz(quizzId) {
           const { data } = await this.$apollo.mutate({
@@ -144,36 +148,39 @@ Dans la partie JS du composant, on ajoute notre handler :
             this.allQuizz = this.allQuizz.filter(quizz => quizz._id !== quizzId);
           }
         }
-      },
+      }
+```
 
 - Rien de bien nouveau ici : on appelle notre mutation graphql, on lui passe le quizzId en paramètre et au retour de la requête, si `data.deleteQuizz === true` (on a retourné un booléen pour cette mutation dans notre resolver) on met à jour l'UI en supprimant le quizz en question
 
 Pour que ca fonctionne il reste évidemment à ajouter cette mutation dans notre dossier `./client/api/quizz.js` :
 
-    import { gql } from "apollo-boost";
+```javascript
+import { gql } from "apollo-boost";
 
-    export const ALL_QUIZZ = gql`
-      query {
-        allQuizz {
-          _id
-          author
-          _id
-          title
-          questions {
-            _id
-            label
-            options
-            answer
-          }
-        }
+export const ALL_QUIZZ = gql`
+  query {
+    allQuizz {
+      _id
+      author
+      _id
+      title
+      questions {
+        _id
+        label
+        options
+        answer
       }
-    `;
+    }
+  }
+`;
 
-    export const DELETE_QUIZZ_BY_ID = gql`
-      mutation($quizzId: ID!) {
-        deleteQuizz(quizzId: $quizzId)
-      }
-    `;
+export const DELETE_QUIZZ_BY_ID = gql`
+  mutation($quizzId: ID!) {
+    deleteQuizz(quizzId: $quizzId)
+  }
+`;
+```
 
 Pas besoin ici de préciser les champs qu'on attend de recevoir... puisqu'il n'y en a pas !
 
@@ -183,73 +190,76 @@ Dans les specs, il est précisé qu'on veut afficher les premières questions (o
 
 Pour faire ça on va créer une nouvelle variable dans data, activeQuizzId qui vaudra null initialement :
 
-    data() {
-        return {
-          allQuizz: [],
-          activeQuizzId: null
-        };
-      },
+```javascript
+data() {
+    return {
+      allQuizz: [],
+      activeQuizzId: null
+    };
+ }
+```
 
 Ensuite, on va mettre un autre @click sur la card du quizz :
 
-    <v-card
-      class="mx-auto mb-2"
-      v-for="quizz in allQuizz"
-      :key="quizz._id"
-      @click="activeQuizzId = quizz._id"
-    >...</v-card>
+```html
+<v-card
+  class="mx-auto mb-2"
+  v-for="quizz in allQuizz"
+  :key="quizz._id"
+  @click="activeQuizzId = quizz._id"
+  >...</v-card
+>
+```
 
 Pas besoin ici de créer une fonction pour ça (on pourrait très bien le faire), on peut assigner directement notre variable.
 
 Ensuite, on ajoute un élement pour boucler sur les questions du quizz avec un v-if qui vérifie si l'id est le même que `activeQuizzId`
 
-    <v-card
-      class="mx-auto mb-2"
-      v-for="quizz in allQuizz"
-      :key="quizz._id"
-      @click="activeQuizzId = quizz._id"
+```html
+<v-card
+  class="mx-auto mb-2"
+  v-for="quizz in allQuizz"
+  :key="quizz._id"
+  @click="activeQuizzId = quizz._id"
+>
+  <v-card-text>
+    <div>{{ quizz.author }}</div>
+    <p class="display-1 text--primary">
+      {{ quizz.title }}
+    </p>
+    <p>{{ quizz.questions.length }} questions</p>
+    <v-layout
+      class="text--primary d-flex"
+      v-if="quizz._id === activeQuizzId"
+      row
     >
-      <v-card-text>
-        <div>{{ quizz.author }}</div>
-        <p class="display-1 text--primary">
-          {{ quizz.title }}
-        </p>
-        <p>{{ quizz.questions.length }} questions</p>
-        <v-layout
-          class="text--primary d-flex"
-          v-if="quizz._id === activeQuizzId"
-          row
+      <v-flex xs10 class="pl-3">
+        <div
+          v-for="(question, index) in quizz.questions.slice(0, 3)"
+          :key="index"
         >
-          <v-flex xs10 class="pl-3">
-            <div
-              v-for="(question, index) in quizz.questions.slice(0, 3)"
-              :key="index"
-            >
-              {{ question.label }}
-            </div>
-            <div v-if="quizz.questions.length > 3">...</div>
-          </v-flex>
-          <div>
-            <v-btn icon color="blue darken-2">
-              <v-icon large>mdi-play</v-icon>
-            </v-btn>
-          </div>
-        </v-layout>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn icon color="green accent-4">
-          <v-icon>mdi-pencil</v-icon>
+          {{ question.label }}
+        </div>
+        <div v-if="quizz.questions.length > 3">...</div>
+      </v-flex>
+      <div>
+        <v-btn icon color="blue darken-2">
+          <v-icon large>mdi-play</v-icon>
         </v-btn>
-        <v-btn
-          @click="handleDeleteQuizz(quizz._id)"
-          icon
-          color="red accent-4"
-        >
-          <v-icon>mdi-delete</v-icon>
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+      </div>
+    </v-layout>
+  </v-card-text>
+  <v-card-actions>
+    <v-spacer></v-spacer>
+    <v-btn icon color="green accent-4">
+      <v-icon>mdi-pencil</v-icon>
+    </v-btn>
+    <v-btn @click="handleDeleteQuizz(quizz._id)" icon color="red accent-4">
+      <v-icon>mdi-delete</v-icon>
+    </v-btn>
+  </v-card-actions>
+</v-card>
+```
 
 ### 5.Cabler les redirections vers EditQuizz et TakeQuizz
 
