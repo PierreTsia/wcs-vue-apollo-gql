@@ -269,7 +269,7 @@ Il nous reste maintenant à gérer les boutons pour créer une nouveau quizz/edi
 - dans la partie `methods` de notre composant :
 
 ```javascript
-editQUizz(quizzId) {
+editQuizz(quizzId) {
     this.$router.push(`/edit-quizz/${quizzId}`);
 }
 ```
@@ -280,12 +280,12 @@ On fait une simple [redirection du router](https://router.vuejs.org/guide/essent
 - Sur l'icone 'crayon' qui sert à l'édition, on appelle cette fonction :
 
 ```html
-<v-btn icon color="green accent-4" @click="editQuizzQuizz(quizz._id)">
+<v-btn icon color="green accent-4" @click="editQuizz(quizz._id)">
   <v-icon>mdi-pencil</v-icon>
 </v-btn>
 ```
 
-Miantenant lorsqu'on clique dessus, on est bien redirigé vers notre composant
+Maintenant lorsqu'on clique dessus, on est bien redirigé vers notre composant
 (qui est vide pour le moment) et on voit que notre route prend bien l'id du quizz
 sur lequel je viens de cliquer, par exemple `http://localhost:8080/edit-quizz/5e237eb8f9633463ded699f7`
 
@@ -299,7 +299,7 @@ En bas du composant, comme dernier élément du template, j'ajoute un bouton:
 
 ```html
 <v-flex xs12>
-  <v-btn @click="editQUizz('new')" text color="red accent-4">
+  <v-btn @click="editQuizz('new')" text color="red accent-4">
     <v-icon>mdi-plus</v-icon>
     Create a new quizz
   </v-btn>
@@ -323,5 +323,290 @@ takeQuizz(quizzId) {
   this.$router.push(`/take-quizz/${quizzId}`);
 }
 ```
+
+### 6.Refactoriser et créer un composant `QuizzItem`
+
+Dans les specs, il est précisé que sur cet écran, je dois afficher x instances
+d'un composant `QuizzItem` : on pouyrrait tout à fait se contenter de ce qu'on a fait jusqu'ici
+mais imaginons que notre app devienne au fur et à mesure plus complexe.
+Dans ce cas, on gagnerait à refactoriser pour créer des _briques_ les plus unitaires possibles :
+c'est à la fois plus facile à lire et à maintenir.
+
+- dans le dossier `/components`, créer un fichier `QuizzItem.vue` avec les 3
+  parties habituelles d'un composant Vue :
+
+```html
+<template> </template>
+
+<script>
+  export default {
+    name: "QuizzItem"
+  };
+</script>
+
+<style scoped></style>
+```
+
+- on fait un `couper/coller` savant pour extraire de `Home` la partie
+  du template qui correspond à un élément quizz (dans mon exemple c'est l'élement
+  `v-card`) :
+
+```html
+<template>
+  <v-card class="mx-auto mb-2">
+    <v-card-text>
+      <div>{{ quizz.author }}</div>
+      <p class="display-1 text--primary">
+        {{ quizz.title }}
+      </p>
+      <p>{{ quizz.questions.length }} questions</p>
+      <v-layout class="text--primary d-flex" row>
+        <v-flex xs10 class="pl-3">
+          <div
+            v-for="(question, index) in quizz.questions.slice(0, 3)"
+            :key="index"
+          >
+            {{ question.label }}
+          </div>
+          <div v-if="quizz.questions.length > 3">...</div>
+        </v-flex>
+        <div>
+          <v-btn icon color="blue darken-2">
+            <v-icon large>mdi-play</v-icon>
+          </v-btn>
+        </div>
+      </v-layout>
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn icon color="green accent-4">
+        <v-icon>mdi-pencil</v-icon>
+      </v-btn>
+      <v-btn icon color="red accent-4">
+        <v-icon>mdi-delete</v-icon>
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</template>
+
+<script>
+  export default {
+    name: "QuizzItem",
+    props: {
+      quizz: {
+        type: Object,
+        default: () => {}
+      }
+    }
+  };
+</script>
+
+<style scoped></style>
+```
+
+Evidemment, ça ne fonctionne plus : les méthods et autres sont `undefined`
+dans ce composant là. Et je n'ai pas envie de les appeler ici :
+c'est plus logique d'avoir la logique d'ensemble dans le composant `Home`
+et de faire de `QuizzItem` [un composant _dumb_](https://medium.com/@thejasonfile/dumb-components-and-smart-components-e7b33a698d43)
+dont la seule responsabilité est d'afficher du contenu dans le DOM, et pas de
+gérer les appels API etc.
+
+Donc au lieux d'appeler nos méthodes directement dans ce composant, au click,
+il va `$emit` quelque chose vers le parent qui, lui est _smart_, va gérer toute la logique.
+
+Dans un premier temps, on va supprimer le `v-for` et tous les `@click` pour ne pas avoir d'erreur Vue.
+Et surtout on va lui déclarer une [props](https://vuejs.org/v2/guide/components-props.html) `quizz` qui lui sera fourni par `Home`
+
+```html
+<script>
+  export default {
+    name: "QuizzItem",
+    props: {
+      quizz: {
+        type: Object,
+        default: () => {}
+      }
+    }
+  };
+</script>
+```
+
+Notez que j'aurais simplement pu la déclarer comme ça :
+
+`props:['quizz']` mais c'est de bonne pratique de typer ses props et/ou de lui donner
+une valeur par défaut.
+
+- maintenant on peut importer ce nouveau composant dans Home:
+
+```javascript
+import QuizzItem from "@/components/QuizzItem";
+
+export default {
+  name: "home",
+  components: {
+    QuizzItem
+  },
+  ...
+}
+```
+
+- et le déclarer dans le template en lui passant la props qu'il attend :
+
+```html
+<v-flex xs12 class="mt-10 pa-5">
+  <QuizzItem v-for="quizz in allQuizz" :key="quizz._id" :quizz="quizz" />
+</v-flex>
+```
+
+La syntaxe c'est `:nomDeLaProps="variableQuiCorrespondACeQueJeVeuxPasserCommeProps"`
+Bon ici, c'est le même nom mais je précise pour que ce soit moins confusant
+
+En faisant ça, tout s'affiche comme avant mais on a perdu les fonctionnalités qu'on avait.
+
+On va donc recabler nos `@click` mais cette fois, au lieu d'appeler les fonctions directement on va `$emit`
+des évènements vers le parent qui, lui, va réagir en conséquence :
+
+- pour set `activeQuizzId` (et afficher la preview):
+
+```html
+<v-card class="mx-auto mb-2" @click="$emit('onSelectQuizz', quizz._id)">
+  ...
+</v-card>
+```
+
+la fonction [`$emit`](https://vuejs.org/v2/guide/components-custom-events.html)
+prend deux paramètres : le premier est le nom que vous donnez à votre event
+(ici `onSelectQuizz`) et le second la (ou les) variables que vous passez avec
+votre évènement. Ici je ne passe qu'une seule variable (l'ID du quizz) mais si
+je voulais en passer plusieurs, je devrais déclarer un objet (je peux pas passer plus de 2
+paramètres) : `$emit('monEvent', {first: myFirstVariable, second: mySecondVariable ...})`
+
+- Maintenant, dans `Home` il faut que j'écoute mon évènement :
+
+```html
+<QuizzItem
+  v-for="quizz in allQuizz"
+  :key="quizz._id"
+  :quizz="quizz"
+  @onSelectQuizz="handleQuizzSelected"
+/>
+```
+
+et on ajoute `handleQuizzSelected` dans methods :
+
+```javascript
+handleQuizzSelected(quizzId) {
+  this.activeQuizzId = quizzId;
+}
+```
+
+Notez que le paramètre `quizzId` est implicite ici : en déclarant simplement
+`@onSelectQuizz="handleQuizzSelected"` dans le template.
+Je pourrais aussi le déclarer explicitement pour réassigner directement ma variable
+`activeQuizzId` : `@onSelectQuizz="(quizzId)=>activeQuizzId = quizzId"`
+
+Là, `activeQuizzId` est bien réassignée à chaque fois que je clique sur un quizz
+mais le composant enfant n'est pas au courant et donc ne réagit pas (encore)
+
+Pour finir, on va donc lui passer une deuxième props qui sera un boolean :
+
+```html
+<QuizzItem
+  v-for="quizz in allQuizz"
+  :key="quizz._id"
+  :quizz="quizz"
+  :isActive="quizz._id === activeQuizzId"
+  @onSelectQuizz="handleQuizzSelected"
+/>
+```
+
+et dans le composant `QuizzItem` :
+
+- on déclare la nouvelle props `isActive`
+
+```html
+<script>
+  export default {
+    name: "QuizzItem",
+    props: {
+      quizz: {
+        type: Object,
+        default: () => {}
+      },
+      isActive: {
+        type: Boolean,
+        default: false
+      }
+    }
+  };
+</script>
+```
+
+et on réécrit notre v-if dans le template
+
+```html
+<v-layout class="text--primary d-flex" v-if="isActive" row>
+  <v-flex xs10 class="pl-3">
+    <div v-for="(question, index) in quizz.questions.slice(0, 3)" :key="index">
+      {{ question.label }}
+    </div>
+    <div v-if="quizz.questions.length > 3">...</div>
+  </v-flex>
+  <div>
+    <v-btn icon color="blue darken-2">
+      <v-icon large>mdi-play</v-icon>
+    </v-btn>
+  </div>
+</v-layout>
+```
+
+Il nous reste plus qu'à réadapter les actions delete et les redirections :
+
+- Delete :
+  Dans `QuizzItem.vue`
+
+```html
+<v-btn icon color="red accent-4" @click="$emit('onDeleteQuizz', quizz._id)">
+  <v-icon>mdi-delete</v-icon>
+</v-btn>
+```
+
+Dans Home :
+
+```html
+<QuizzItem
+  v-for="quizz in allQuizz"
+  :key="quizz._id"
+  :quizz="quizz"
+  :isActive="quizz._id === activeQuizzId"
+  @onSelectQuizz="handleQuizzSelected"
+  @onDeleteQuizz="handleDeleteQuizz"
+/>
+```
+
+- Redirections vers `TakeQuizz` et `EditQuizz`:
+
+Dans `QuizzItem.vue` :
+
+```html
+<v-btn icon color="green accent-4" @click="$emit('onEditQuizz', quizz._id)">
+  <v-icon>mdi-pencil</v-icon>
+</v-btn>
+```
+
+Dans `Home` :
+
+```html
+<QuizzItem
+  v-for="quizz in allQuizz"
+  :key="quizz._id"
+  :quizz="quizz"
+  :isActive="quizz._id === activeQuizzId"
+  @onSelectQuizz="handleQuizzSelected"
+  @onDeleteQuizz="handleDeleteQuizz"
+  @oneditQuizz="editQuizz"
+/>
+```
+Voilà, toutes nos fonctionnalités marchent de nouveau !
 
 On en a fini pour la page `Home` 🕺!
