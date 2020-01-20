@@ -10,51 +10,35 @@
     </section>
     <section class="addQuestions"></section>
     <section class="quizzQuestions">
-      <v-card
-        class="mx-auto mb-2"
+      <Question
         v-for="(question, index) in questions"
         :key="question._id"
-      >
-        <v-card-text>
-          <h4 class="text-center">Question n°{{ index + 1 }}</h4>
-          <h3 class="display-1 text--primary text-center">
-            {{ question.label }}
-          </h3>
-
-          <div class="text--primary justify-space-between d-flex row mt-3">
-            <v-flex
-              xs6
-              v-for="(option, i) in question.options"
-              :key="i"
-              class="px-10 mt-3"
-            >
-              <input
-                type="checkbox"
-                :id="`${question._id}--${option}`"
-                :checked="isCorrect(option, question.answer)"
-              />
-              <label :for="`${question._id}--${option}`" class="pb-1">{{
-                option
-              }}</label>
-            </v-flex>
-          </div>
-        </v-card-text>
-        <v-card-actions>
-          <!--<v-btn text color="deep-purple accent-4">
-            Learn More
-          </v-btn>-->
-        </v-card-actions>
-      </v-card>
+        :question="question"
+        :questionIndex="index"
+        @onQuestionEdited="
+          newQuestion => handleQuestionEdited(newQuestion, index)
+        "
+      />
     </section>
-    <section class="saveQuizz"></section>
+    <section class="saveQuizz d-flex justify-center">
+      <v-btn primary color="blue accent-4">
+        <v-icon class="white--text">mdi-floppy</v-icon>
+        <span class="white--text">Save Quizz</span>
+      </v-btn>
+    </section>
   </div>
 </template>
 
 <script>
 import { QUIZZ_BY_ID } from "../../api/quizz";
+import { UPDATE_QUESTION } from "../../api/questions";
+import Question from "@/components/Question";
 
 export default {
   name: "EditQuizz",
+  components: {
+    Question
+  },
   data() {
     return {
       quizz: null,
@@ -62,8 +46,14 @@ export default {
     };
   },
   methods: {
-    isCorrect(option, answers) {
-      return answers.includes(option);
+    async handleQuestionEdited(newQuestion, index) {
+      //eslint-disable-next-line
+      const { __typename, ...questionInput } = newQuestion;
+      const { data } = await this.$apollo.mutate({
+        mutation: UPDATE_QUESTION,
+        variables: { questionInput }
+      });
+      this.$set(this.questions, index, data.updateQuestion);
     }
   },
   async mounted() {

@@ -10,3 +10,14 @@ export const ALL_QUESTIONS = gql`
     }
   }
 `;
+
+export const UPDATE_QUESTION = gql`
+  mutation($questionInput: QuestionInput!) {
+    updateQuestion(questionInput: $questionInput) {
+      _id
+      label
+      options
+      answer
+    }
+  }
+`;

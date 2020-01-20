@@ -112,3 +112,14 @@ Dans cette étape on va :
 
 - installer une framework CSS
 - créer notre composant Home et la logique qui va avec
+
+
+### [Step 8](./doc/step8.md)
+
+Dans cette étape on va :
+
+- créer le composant EditQuizz.vue et son sous-composant Question.vue
+- gérer la logique pour éditer une question et la sauvegarder en base
+- ajouter une question déjà existante au quizz
+- ajouter une nouvelle question au quizz
+- sauvegarder le quizz
